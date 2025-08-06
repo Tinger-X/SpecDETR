@@ -19,11 +19,11 @@ from typing import Optional, Sequence, Tuple, Union
 from mmdet.registry import MODELS
 from mmdet.utils import OptConfigType, OptMultiConfig
 from torch import Tensor, nn
-from ..layers import PatchEmbed, PatchMerging,AdaptivePadding
+from ..layers import PatchEmbed, PatchMerging, AdaptivePadding
 
 
 def expand_tensor_along_second_dim(x, num):
-    assert x.size(1)<=num
+    assert x.size(1) <= num
     # 计算需要重复的次数
     repeat_times = num // x.size(1)
     # 使用 repeat 函数对 x 张量进行复制
@@ -32,6 +32,7 @@ def expand_tensor_along_second_dim(x, num):
     if num % x.size(1) != 0:
         x = torch.cat([x, x[:, :num % x.size(1)]], dim=1)
     return x
+
 
 def extract_tensor_along_second_dim(x, m):
     # 计算等间隔的索引
@@ -44,22 +45,22 @@ def extract_tensor_along_second_dim(x, m):
 
 @MODELS.register_module()
 class No_backbone_ST(BaseModule):
-    def __init__(self,
-                 in_channels=3,
-                 embed_dims=96,
-                 strides=(1, 2, 2, 4),
-                 patch_size=(1, 2, 2, 4),
-                 patch_norm=True,
-                 act_cfg=dict(type='GELU'),
-                 norm_cfg=dict(type='LN'),
-                 pretrained=None,
-                 num_levels =2,
-                 init_cfg=None):
-        assert not (init_cfg and pretrained), \
-            'init_cfg and pretrained cannot be specified at the same time'
+    def __init__(
+            self,
+            in_channels=3,
+            embed_dims=96,
+            strides=(1, 2, 2, 4),
+            patch_size=(1, 2, 2, 4),
+            patch_norm=True,
+            act_cfg=dict(type='GELU'),
+            norm_cfg=dict(type='LN'),
+            pretrained=None,
+            num_levels=2,
+            init_cfg=None
+    ):
+        assert not (init_cfg and pretrained), 'init_cfg and pretrained cannot be specified at the same time'
         if isinstance(pretrained, str):
-            warnings.warn('DeprecationWarning: pretrained is deprecated, '
-                          'please use "init_cfg" instead')
+            warnings.warn('DeprecationWarning: pretrained is deprecated, please use "init_cfg" instead')
             self.init_cfg = dict(type='Pretrained', checkpoint=pretrained)
         elif pretrained is None:
             self.init_cfg = init_cfg
@@ -68,7 +69,7 @@ class No_backbone_ST(BaseModule):
 
         super(No_backbone_ST, self).__init__(init_cfg=init_cfg)
         assert strides[0] == patch_size[0], 'Use non-overlapping patch embed.'
-        self.embed_dims =embed_dims
+        self.embed_dims = embed_dims
         self.in_channels = in_channels
 
         self.patch_embed = PatchEmbed(
@@ -78,7 +79,8 @@ class No_backbone_ST(BaseModule):
             kernel_size=patch_size[0],
             stride=strides[0],
             norm_cfg=norm_cfg if patch_norm else None,
-            init_cfg=None)
+            init_cfg=None
+        )
         self.num_levels = num_levels
         self.conv = nn.Conv2d(in_channels, embed_dims, kernel_size=1)
         self.mlp = nn.Sequential(
@@ -111,7 +113,7 @@ class No_backbone_ST(BaseModule):
         # out = self.norm(out.flatten(2)).transpose(1, 2)
         # y = x.reshape(x.size(0),x.size(1),-1).permute(0, 2, 1)
         # out = self.mlp(y)
-        out = out.permute(0, 2, 1).reshape(x.size(0), self.embed_dims,x.size(2),x.size(3)).contiguous()
+        out = out.permute(0, 2, 1).reshape(x.size(0), self.embed_dims, x.size(2), x.size(3)).contiguous()
         outs.append(out)
         if self.num_levels > 1:
             mean = outs[0].mean(dim=(2, 3), keepdim=True).detach()

@@ -45,20 +45,21 @@ class DetectionTransformer(BaseDetector, metaclass=ABCMeta):
             the initialization. Defaults to None.
     """
 
-    def __init__(self,
-                 backbone: ConfigType,
-                 neck: OptConfigType = None,
-                 encoder: OptConfigType = None,
-                 decoder: OptConfigType = None,
-                 bbox_head: OptConfigType = None,
-                 positional_encoding: OptConfigType = None,
-                 num_queries: int = 100,
-                 train_cfg: OptConfigType = None,
-                 test_cfg: OptConfigType = None,
-                 data_preprocessor: OptConfigType = None,
-                 init_cfg: OptMultiConfig = None) -> None:
-        super().__init__(
-            data_preprocessor=data_preprocessor, init_cfg=init_cfg)
+    def __init__(
+            self,
+            backbone: ConfigType,
+            neck: OptConfigType = None,
+            encoder: OptConfigType = None,
+            decoder: OptConfigType = None,
+            bbox_head: OptConfigType = None,
+            positional_encoding: OptConfigType = None,
+            num_queries: int = 100,
+            train_cfg: OptConfigType = None,
+            test_cfg: OptConfigType = None,
+            data_preprocessor: OptConfigType = None,
+            init_cfg: OptMultiConfig = None
+    ):
+        super().__init__(data_preprocessor=data_preprocessor, init_cfg=init_cfg)
         # process args
         bbox_head.update(train_cfg=train_cfg)
         bbox_head.update(test_cfg=test_cfg)
@@ -68,7 +69,7 @@ class DetectionTransformer(BaseDetector, metaclass=ABCMeta):
         self.decoder = decoder
         self.positional_encoding = positional_encoding
         self.num_queries = num_queries
-        self.encoder_layers_num=encoder['num_layers']
+        self.encoder_layers_num = encoder['num_layers']
         # init model layers
         self.backbone = MODELS.build(backbone)
         if neck is not None:

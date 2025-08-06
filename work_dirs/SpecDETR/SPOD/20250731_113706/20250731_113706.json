@@ -1,0 +1,21 @@
+{
+  "coco/CB_precision": 0.0,
+  "coco/MP_precision": 0.0,
+  "coco/FG_precision": 0.001,
+  "coco/NP_precision": 0.0,
+  "coco/LO_precision": 0.0,
+  "coco/K_N_precision": 0.005,
+  "coco/P_O_precision": 0.012,
+  "coco/V_Y_W_precision": 0.002,
+  "coco/bbox_mAP": 0.002,
+  "coco/bbox_mAP_50": 0.01,
+  "coco/bbox_mAP_75": 0.0,
+  "coco/bbox_mAP_s": 0.002,
+  "coco/bbox_mAP_m": -1.0,
+  "coco/bbox_mAP_l": -1.0,
+  "coco/AR@100": 0.005654450261780105,
+  "coco/AR@300": 0.005654450261780105,
+  "coco/AR@1000": 0.005654450261780105,
+  "data_time": 0.05172733306884766,
+  "time": 1.543176712989807
+}

@@ -1,0 +1,14 @@
+{
+  "coco/Airport_precision": 0.101,
+  "coco/bbox_mAP": 0.101,
+  "coco/bbox_mAP_50": 0.337,
+  "coco/bbox_mAP_75": 0.0,
+  "coco/bbox_mAP_s": 0.101,
+  "coco/bbox_mAP_m": -1.0,
+  "coco/bbox_mAP_l": -1.0,
+  "coco/AR@100": 0.1,
+  "coco/AR@300": 0.1,
+  "coco/AR@1000": 0.1,
+  "data_time": 2.7934048175811768,
+  "time": 4.24991250038147
+}

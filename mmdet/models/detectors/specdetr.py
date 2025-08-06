@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-from typing import Dict, Optional, Tuple,List, Union
+from typing import Dict, Optional, Tuple, List, Union
 
 import torch
 from torch import Tensor, nn
@@ -8,17 +8,13 @@ from torch.nn.init import normal_
 from mmdet.registry import MODELS
 from mmdet.structures import OptSampleList, SampleList
 from mmdet.utils import OptConfigType
-# from ..layers import (CdnQueryGenerator, DeformableDetrTransformerEncoder,
-#                       DinoTransformerDecoder, SinePositionalEncoding)
 from ..layers import SinePositionalEncoding
 from ..layers.transformer.specdetr_layers import (CdnQueryGenerator, SpecDetrTransformerEncoder,
-                      SpecDetrTransformerDecoder, )
+                                                  SpecDetrTransformerDecoder, )
 from .deformable_detr import DeformableDETR
 
 from ..layers.transformer.specdetr_atten import MultiScaleDeformableAttention_1 as MultiScaleDeformableAttention
 
-import itertools
-import numpy as np
 
 @MODELS.register_module()
 class SpecDetr(DeformableDETR):
@@ -33,19 +29,21 @@ class SpecDetr(DeformableDETR):
             query generator. Defaults to `None`.
     """
 
-    def __init__(self, *args,
-                 candidate_bboxes_size: float = 0.01,
-                 scale_gt_bboxes_size: float = 0,
-                 training_dn: bool = True,
-                 dn_only_pos: bool = False,
-                 remove_last_candidate: bool = False,
-                 num_query_per_cat:int = 0,
-                 num_fix_query :int= 0,
-                 anchor_iou_th: float = 0.5,
-                 query_interval: int  =1,
-                 dn_type: str = 'CDN',
-                 query_initial: str = 'one',
-                 dn_cfg: OptConfigType = None, **kwargs) -> None:
+    def __init__(
+            self, *args,
+            candidate_bboxes_size: float = 0.01,
+            scale_gt_bboxes_size: float = 0,
+            training_dn: bool = True,
+            dn_only_pos: bool = False,
+            remove_last_candidate: bool = False,
+            num_query_per_cat: int = 0,
+            num_fix_query: int = 0,
+            anchor_iou_th: float = 0.5,
+            query_interval: int = 1,
+            dn_type: str = 'CDN',
+            query_initial: str = 'one',
+            dn_cfg: OptConfigType = None, **kwargs
+    ):
         self.query_initial = query_initial
         super().__init__(*args, **kwargs)
         assert self.as_two_stage, 'as_two_stage must be True for DINO'
@@ -62,13 +60,13 @@ class SpecDetr(DeformableDETR):
             dn_cfg['embed_dims'] = self.embed_dims
             dn_cfg['num_matching_queries'] = self.num_queries
 
-        self.candidate_bboxes_size =candidate_bboxes_size
+        self.candidate_bboxes_size = candidate_bboxes_size
         # self.scale_gt_bboxes_size = scale_gt_bboxes_size
         self.remove_last_candidate = remove_last_candidate
         self.dn_query_generator = CdnQueryGenerator(**dn_cfg)
 
         self.pos_bbox_offsets = []
-        self.training_dn =training_dn
+        self.training_dn = training_dn
         self.dn_only_pos = dn_only_pos
         self.num_query_per_cat = num_query_per_cat
         self.num_fix_query = num_fix_query
@@ -78,8 +76,7 @@ class SpecDetr(DeformableDETR):
 
     def _init_layers(self) -> None:
         """Initialize layers except for backbone, neck and bbox_head."""
-        self.positional_encoding = SinePositionalEncoding(
-            **self.positional_encoding)
+        self.positional_encoding = SinePositionalEncoding(**self.positional_encoding)
         if self.encoder_layers_num > 0:
             self.encoder = SpecDetrTransformerEncoder(**self.encoder)
         self.decoder = SpecDetrTransformerDecoder(**self.decoder)
@@ -96,30 +93,28 @@ class SpecDetr(DeformableDETR):
             f'embed_dims should be exactly 2 times of num_feats. ' \
             f'Found {self.embed_dims} and {num_feats}.'
 
-        self.level_embed = nn.Parameter(
-            torch.Tensor(self.num_feature_levels, self.embed_dims))
+        self.level_embed = nn.Parameter(torch.Tensor(self.num_feature_levels, self.embed_dims))
         self.memory_trans_fc = nn.Linear(self.embed_dims, self.embed_dims)
         self.memory_trans_norm = nn.LayerNorm(self.embed_dims)
 
     def init_weights(self) -> None:
         """Initialize weights for Transformer and other components."""
         super(DeformableDETR, self).init_weights()
-        if self.encoder_layers_num>0:
+        if self.encoder_layers_num > 0:
             for coder in self.encoder, self.decoder:
                 for p in coder.parameters():
                     if p.dim() > 1:
                         nn.init.xavier_uniform_(p)
         else:
-                for p in self.decoder.parameters():
-                    if p.dim() > 1:
-                        nn.init.xavier_uniform_(p)
+            for p in self.decoder.parameters():
+                if p.dim() > 1:
+                    nn.init.xavier_uniform_(p)
         for m in self.modules():
             if isinstance(m, MultiScaleDeformableAttention):
                 m.init_weights()
         nn.init.xavier_uniform_(self.memory_trans_fc.weight)
         # nn.init.xavier_uniform_(self.query_embedding.weight)
         normal_(self.level_embed)
-
 
     def extract_feat(self, batch_inputs: Tensor) -> Tuple[Tensor]:
         """Extract features.
@@ -159,9 +154,7 @@ class SpecDetr(DeformableDETR):
         losses = self.bbox_head.loss(
             **head_inputs_dict, batch_data_samples=batch_data_samples)
 
-
         return losses
-
 
     def predict(self,
                 batch_inputs: Tensor,
@@ -202,8 +195,8 @@ class SpecDetr(DeformableDETR):
         return batch_data_samples
 
     def _forward(self,
-            batch_inputs: Tensor,
-            batch_data_samples: OptSampleList = None) -> Tuple[List[Tensor]]:
+                 batch_inputs: Tensor,
+                 batch_data_samples: OptSampleList = None) -> Tuple[List[Tensor]]:
         """Network forward process. Usually includes backbone, neck and head
         forward without any post-processing.
 
@@ -224,9 +217,9 @@ class SpecDetr(DeformableDETR):
         return results
 
     def forward_transformer(
-        self,
-        img_feats: Tuple[Tensor],
-        batch_data_samples: OptSampleList = None,
+            self,
+            img_feats: Tuple[Tensor],
+            batch_data_samples: OptSampleList = None,
     ) -> Dict:
         """Forward process of Transformer.
 
@@ -349,7 +342,7 @@ class SpecDetr(DeformableDETR):
             dtype=torch.long,
             device=feat_flatten.device)
         level_start_index = torch.cat((
-            spatial_shapes.new_zeros((1, )),  # (num_level)
+            spatial_shapes.new_zeros((1,)),  # (num_level)
             spatial_shapes.prod(1).cumsum(0)[:-1]))
         valid_ratios = torch.stack(  # (bs, num_level, 2)
             [self.get_valid_ratio(m) for m in mlvl_masks], 1)
@@ -418,14 +411,12 @@ class SpecDetr(DeformableDETR):
                 spatial_shapes=spatial_shapes)
         return encoder_outputs_dict
 
-
-
     def pre_decoder(
-        self,
-        memory: Tensor,
-        memory_mask: Tensor,
-        spatial_shapes: Tensor,
-        batch_data_samples: OptSampleList = None,
+            self,
+            memory: Tensor,
+            memory_mask: Tensor,
+            spatial_shapes: Tensor,
+            batch_data_samples: OptSampleList = None,
 
     ) -> Tuple[Dict]:
         """Prepare intermediate variables before entering Transformer decoder,
@@ -465,20 +456,20 @@ class SpecDetr(DeformableDETR):
             memory, memory_mask, spatial_shapes)
 
         if self.remove_last_candidate:
-            output_memory = output_memory[:,:-1,:]
-            output_proposals = output_proposals[:,:-1,:]
+            output_memory = output_memory[:, :-1, :]
+            output_proposals = output_proposals[:, :-1, :]
 
         enc_outputs_class = self.bbox_head.cls_branches[
             self.decoder.num_layers](
-                output_memory)
+            output_memory)
         enc_outputs_coord_unact = self.bbox_head.reg_branches[
-            self.decoder.num_layers](output_memory) + output_proposals
+                                      self.decoder.num_layers](output_memory) + output_proposals
 
         # NOTE The DINO selects top-k proposals according to scores of
         # multi-class classification, while DeformDETR, where the input
         # is `enc_outputs_class[..., 0]` selects according to scores of
         # binary classification.
-        assert self.num_query_per_cat*cls_out_features<=self.num_queries
+        assert self.num_query_per_cat * cls_out_features <= self.num_queries
 
         topk_indices = torch.topk(
             enc_outputs_class.max(-1)[0], k=self.num_queries, dim=1)[1]
@@ -491,7 +482,6 @@ class SpecDetr(DeformableDETR):
             topk_indices.unsqueeze(-1).repeat(1, 1, 4))
         topk_coords = topk_coords_unact.sigmoid()
         topk_coords_unact = topk_coords_unact.detach()
-
 
         if self.query_initial == 'one':
             query = torch.ones((self.num_queries, 1, self.embed_dims), device=memory.device)
@@ -591,8 +581,6 @@ class SpecDetr(DeformableDETR):
             valid_ratios=valid_ratios,
             reg_branches=self.bbox_head.reg_branches)
 
-
-
         if len(query) == self.num_queries:
             # NOTE: This is to make sure label_embeding can be involved to
             # produce loss even if there is no denoising query (no ground truth
@@ -604,7 +592,6 @@ class SpecDetr(DeformableDETR):
         decoder_outputs_dict = dict(
             hidden_states=inter_states, references=list(references))
         return decoder_outputs_dict
-
 
     @staticmethod
     def get_valid_ratio(mask: Tensor) -> Tensor:
@@ -675,7 +662,7 @@ class SpecDetr(DeformableDETR):
         _cur = 0  # start index in the sequence of the current level
         for lvl, (H, W) in enumerate(spatial_shapes):
             mask_flatten_ = memory_mask[:,
-                                        _cur:(_cur + H * W)].view(bs, H, W, 1)
+                            _cur:(_cur + H * W)].view(bs, H, W, 1)
             valid_H = torch.sum(~mask_flatten_[:, :, 0, 0], 1).unsqueeze(-1)
             valid_W = torch.sum(~mask_flatten_[:, 0, :, 0], 1).unsqueeze(-1)
             grid_y, grid_x = torch.meshgrid(
@@ -695,7 +682,7 @@ class SpecDetr(DeformableDETR):
         output_proposals = torch.cat(proposals, 1)
         output_proposals_valid = ((output_proposals > 0.0001) &
                                   (output_proposals < 0.9999)).all(
-                                      -1, keepdim=True)
+            -1, keepdim=True)
         # inverse_sigmoid
         output_proposals = torch.log(output_proposals / (1 - output_proposals))
         output_proposals = output_proposals.masked_fill(
@@ -711,9 +698,3 @@ class SpecDetr(DeformableDETR):
         output_memory = self.memory_trans_norm(output_memory)
         # [bs, sum(hw), 2]
         return output_memory, output_proposals
-
-
-
-
-
-

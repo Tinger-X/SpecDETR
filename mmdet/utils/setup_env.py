@@ -34,7 +34,8 @@ def setup_cache_size_limit_of_dynamo():
                 f'torch._dynamo.config.cache_size_limit is force '
                 f'set to {cache_size_limit}.',
                 logger='current',
-                level=logging.WARNING)
+                level=logging.WARNING
+            )
 
 
 def setup_multi_processes(cfg):

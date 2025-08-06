@@ -25,11 +25,8 @@ class BaseDetector(BaseModel, metaclass=ABCMeta):
            initialization. Defaults to None.
     """
 
-    def __init__(self,
-                 data_preprocessor: OptConfigType = None,
-                 init_cfg: OptMultiConfig = None):
-        super().__init__(
-            data_preprocessor=data_preprocessor, init_cfg=init_cfg)
+    def __init__(self, data_preprocessor: OptConfigType = None, init_cfg: OptMultiConfig = None):
+        super().__init__(data_preprocessor=data_preprocessor, init_cfg=init_cfg)
 
     @property
     def with_neck(self) -> bool:

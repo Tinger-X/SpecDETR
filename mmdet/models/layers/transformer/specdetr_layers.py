@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import warnings
 import numpy as np
-from typing import Optional, Tuple, Union,List
+from typing import Optional, Tuple, Union, List
 import torch
 from mmcv.cnn import build_norm_layer
 from mmcv.cnn.bricks.transformer import FFN, MultiheadAttention
@@ -12,7 +12,7 @@ from torch import Tensor, nn
 from mmengine.model import BaseModule
 
 from mmdet.structures import SampleList
-from mmdet.structures.bbox import bbox_xyxy_to_cxcywh,bbox_cxcywh_to_xyxy
+from mmdet.structures.bbox import bbox_xyxy_to_cxcywh, bbox_cxcywh_to_xyxy
 from mmengine import ConfigDict
 from mmdet.utils import ConfigType, OptConfigType
 # from .detr_layers import (DetrTransformerDecoder, DetrTransformerDecoderLayer,
@@ -33,17 +33,17 @@ class SpecDetrTransformerEncoder(BaseModule):
             the initialization. Defaults to None.
     """
 
-    def __init__(self,
-                 num_layers: int,
-                 layer_cfg: ConfigType,
-                 init_cfg: OptConfigType = None) -> None:
-
+    def __init__(
+            self,
+            num_layers: int,
+            layer_cfg: ConfigType,
+            init_cfg: OptConfigType = None
+    ):
         super().__init__(init_cfg=init_cfg)
         self.num_layers = num_layers
         self.layer_cfg = layer_cfg
         self._init_layers()
         self.save_id = 0
-
 
     def _init_layers(self) -> None:
         """Initialize encoder layers."""
@@ -51,7 +51,7 @@ class SpecDetrTransformerEncoder(BaseModule):
             SpecDetrTransformerEncoderLayer(**self.layer_cfg)
             for _ in range(self.num_layers)
         ])
-        self.embed_dims = self.layers[0].embed_dims
+        self.embed_dims = self.layers[0].embed_dims  # Important stop
 
     def forward(self, query: Tensor, query_pos: Tensor,
                 key_padding_mask: Tensor, spatial_shapes: Tensor,
@@ -131,9 +131,9 @@ class SpecDetrTransformerEncoder(BaseModule):
                 torch.linspace(
                     0.5, W - 0.5, W, dtype=torch.float32, device=device))
             ref_y = ref_y.reshape(-1)[None] / (
-                valid_ratios[:, None, lvl, 1] * H)
+                    valid_ratios[:, None, lvl, 1] * H)
             ref_x = ref_x.reshape(-1)[None] / (
-                valid_ratios[:, None, lvl, 0] * W)
+                    valid_ratios[:, None, lvl, 0] * W)
             ref = torch.stack((ref_x, ref_y), -1)
             reference_points_list.append(ref)
         reference_points = torch.cat(reference_points_list, 1)
@@ -157,12 +157,14 @@ class SpecDetrTransformerDecoder(BaseModule):
             the initialization. Defaults to None.
     """
 
-    def __init__(self,
-                 num_layers: int,
-                 layer_cfg: ConfigType,
-                 post_norm_cfg: OptConfigType = dict(type='LN'),
-                 return_intermediate: bool = True,
-                 init_cfg: Union[dict, ConfigDict] = None) -> None:
+    def __init__(
+            self,
+            num_layers: int,
+            layer_cfg: ConfigType,
+            post_norm_cfg: OptConfigType = dict(type='LN'),
+            return_intermediate: bool = True,
+            init_cfg: Union[dict, ConfigDict] = None
+    ):
         super().__init__(init_cfg=init_cfg)
         self.layer_cfg = layer_cfg
         self.num_layers = num_layers
@@ -178,10 +180,8 @@ class SpecDetrTransformerDecoder(BaseModule):
         ])
         self.embed_dims = self.layers[0].embed_dims
         if self.post_norm_cfg is not None:
-            raise ValueError('There is not post_norm in '
-                             f'{self._get_name()}')
-        self.ref_point_head = MLP(self.embed_dims * 2, self.embed_dims,
-                                  self.embed_dims, 2)
+            raise ValueError(f'There is not post_norm in {self._get_name()}')
+        self.ref_point_head = MLP(self.embed_dims * 2, self.embed_dims, self.embed_dims, 2)
         self.norm = nn.LayerNorm(self.embed_dims)
 
     def forward(self, query: Tensor, value: Tensor, key_padding_mask: Tensor,
@@ -232,7 +232,7 @@ class SpecDetrTransformerDecoder(BaseModule):
                     reference_points[:, :, None] * valid_ratios[:, None]
 
             query_sine_embed = coordinate_to_encoding(
-                reference_points_input[:, :, 0, :], self.embed_dims/2 )
+                reference_points_input[:, :, 0, :], self.embed_dims / 2)
             query_pos = self.ref_point_head(query_sine_embed)
 
             query = layer(
@@ -283,18 +283,19 @@ class SpecDetrTransformerEncoderLayer(BaseModule):
             the initialization. Defaults to None.
     """
 
-    def __init__(self,
-                 self_attn_cfg: OptConfigType = dict(
-                     embed_dims=256, num_heads=8, dropout=0.0),
-                 ffn_cfg: OptConfigType = dict(
-                     embed_dims=256,
-                     feedforward_channels=1024,
-                     num_fcs=2,
-                     ffn_drop=0.,
-                     act_cfg=dict(type='ReLU', inplace=True)),
-                 norm_cfg: OptConfigType = dict(type='LN'),
-                 init_cfg: OptConfigType = None) -> None:
-
+    def __init__(
+            self,
+            self_attn_cfg: OptConfigType = dict(
+                embed_dims=256, num_heads=8, dropout=0.0),
+            ffn_cfg: OptConfigType = dict(
+                embed_dims=256,
+                feedforward_channels=1024,
+                num_fcs=2,
+                ffn_drop=0.,
+                act_cfg=dict(type='ReLU', inplace=True)),
+            norm_cfg: OptConfigType = dict(type='LN'),
+            init_cfg: OptConfigType = None
+    ):
         super().__init__(init_cfg=init_cfg)
 
         self.self_attn_cfg = self_attn_cfg
@@ -363,27 +364,28 @@ class SpecDetrTransformerDecoderLayer(BaseModule):
             the initialization. Defaults to None.
     """
 
-    def __init__(self,
-                 self_attn_cfg: OptConfigType = dict(
-                     embed_dims=256,
-                     num_heads=8,
-                     dropout=0.0,
-                     batch_first=True),
-                 cross_attn_cfg: OptConfigType = dict(
-                     embed_dims=256,
-                     num_heads=8,
-                     dropout=0.0,
-                     batch_first=True),
-                 ffn_cfg: OptConfigType = dict(
-                     embed_dims=256,
-                     feedforward_channels=1024,
-                     num_fcs=2,
-                     ffn_drop=0.,
-                     act_cfg=dict(type='ReLU', inplace=True),
-                 ),
-                 norm_cfg: OptConfigType = dict(type='LN'),
-                 init_cfg: OptConfigType = None) -> None:
-
+    def __init__(
+            self,
+            self_attn_cfg: OptConfigType = dict(
+                embed_dims=256,
+                num_heads=8,
+                dropout=0.0,
+                batch_first=True),
+            cross_attn_cfg: OptConfigType = dict(
+                embed_dims=256,
+                num_heads=8,
+                dropout=0.0,
+                batch_first=True),
+            ffn_cfg: OptConfigType = dict(
+                embed_dims=256,
+                feedforward_channels=1024,
+                num_fcs=2,
+                ffn_drop=0.,
+                act_cfg=dict(type='ReLU', inplace=True),
+            ),
+            norm_cfg: OptConfigType = dict(type='LN'),
+            init_cfg: OptConfigType = None
+    ):
         super().__init__(init_cfg=init_cfg)
 
         self.self_attn_cfg = self_attn_cfg
@@ -405,7 +407,6 @@ class SpecDetrTransformerDecoderLayer(BaseModule):
         self.ffn_cfg = ffn_cfg
         self.norm_cfg = norm_cfg
         self._init_layers()
-
 
     def _init_layers(self) -> None:
         """Initialize self_attn, cross-attn, ffn, and norms."""
@@ -510,14 +511,16 @@ class CdnQueryGenerator(BaseModule):
             to `None`.
     """
 
-    def __init__(self,
-                 num_classes: int,
-                 embed_dims: int,
-                 num_matching_queries: int,
-                 label_noise_scale: float = 0.5,
-                 box_noise_scale: float = 1.0,
-                 query_initial: str = 'one',
-                 group_cfg: OptConfigType = None) -> None:
+    def __init__(
+            self,
+            num_classes: int,
+            embed_dims: int,
+            num_matching_queries: int,
+            label_noise_scale: float = 0.5,
+            box_noise_scale: float = 1.0,
+            query_initial: str = 'one',
+            group_cfg: OptConfigType = None
+    ):
         super().__init__()
         self.num_classes = num_classes
         self.embed_dims = embed_dims
@@ -530,8 +533,7 @@ class CdnQueryGenerator(BaseModule):
         self.dynamic_dn_groups = group_cfg.get('dynamic', True)
         if self.dynamic_dn_groups:
             if 'num_dn_queries' not in group_cfg:
-                warnings.warn("'num_dn_queries' should be set when using "
-                              'dynamic dn groups, use 100 as default.')
+                warnings.warn("'num_dn_queries' should be set when using dynamic dn groups, use 100 as default.")
             self.num_dn_queries = group_cfg.get('num_dn_queries', 100)
             assert isinstance(self.num_dn_queries, int), \
                 f'Expected the num_dn_queries to have type int, but got ' \
@@ -549,9 +551,9 @@ class CdnQueryGenerator(BaseModule):
         # indicates `Unknown` class. However, the embedding of `unknown` class
         # is not used in the original DINO.
         # TODO: num_classes + 1 or num_classes ?
-        self.query_initial =query_initial
+        self.query_initial = query_initial
         if self.query_initial == 'embed':
-             self.label_embedding = nn.Embedding(self.num_classes, self.embed_dims)
+            self.label_embedding = nn.Embedding(self.num_classes, self.embed_dims)
 
     def __call__(self, batch_data_samples: SampleList) -> tuple:
         """Generate contrastive denoising (cdn) queries with ground truth.
@@ -624,7 +626,6 @@ class CdnQueryGenerator(BaseModule):
         batch_idx = torch.cat([
             torch.full_like(t.long(), i) for i, t in enumerate(gt_labels_list)
         ])
-
 
         #  dn_label_query, dn_bbox_query目前将一个batch内所有图像的正负样本拼接在一起，需要按batch size分开
         #  每一张图目标数目不一样，数目同一设为最大目标数*group*2
@@ -705,16 +706,14 @@ class CdnQueryGenerator(BaseModule):
             num_target_total * num_groups * 2`.
         """
         if self.query_initial == 'one':
-            dn_label_query = torch.ones((gt_labels.size(0)*num_groups*2, self.embed_dims), device=gt_labels.device)
+            dn_label_query = torch.ones((gt_labels.size(0) * num_groups * 2, self.embed_dims), device=gt_labels.device)
         elif self.query_initial == 'random':
-            dn_label_query = torch.rand((gt_labels.size(0)*num_groups*2, self.embed_dims), device=gt_labels.device)
+            dn_label_query = torch.rand((gt_labels.size(0) * num_groups * 2, self.embed_dims), device=gt_labels.device)
         elif self.query_initial == 'embed':
             gt_labels_expand = gt_labels.repeat(2 * num_groups,
                                                 1).view(-1)
             dn_label_query = self.label_embedding(gt_labels_expand)
         return dn_label_query
-
-
 
     def generate_dn_bbox_query(self, gt_bboxes: Tensor,
                                num_groups: int) -> Tensor:
@@ -787,13 +786,12 @@ class CdnQueryGenerator(BaseModule):
         positive_idx = positive_idx.flatten()
         negative_idx = positive_idx + len(gt_bboxes)
 
-
         bboxes_cxcywh_expand = bbox_xyxy_to_cxcywh(gt_bboxes_expand)
         bboxes_whwh = bbox_xyxy_to_cxcywh(gt_bboxes_expand)[:, 2:].repeat(1, 2)
         rand_part = torch.rand_like(gt_bboxes_expand) * 2.0 - 1.0
-        rand_part[:,:2] *= self.label_noise_scale
+        rand_part[:, :2] *= self.label_noise_scale
         rand_part[:, 2:] *= self.box_noise_scale
-        noisy_bboxes_expand = bboxes_cxcywh_expand + torch.mul(rand_part, bboxes_whwh)/2
+        noisy_bboxes_expand = bboxes_cxcywh_expand + torch.mul(rand_part, bboxes_whwh) / 2
 
         rand_sign = torch.randint_like(
             gt_bboxes_expand, low=0, high=2,
@@ -804,14 +802,14 @@ class CdnQueryGenerator(BaseModule):
         rand_part = self.label_noise_scale + rand_part * self.label_noise_scale
         # rand_part = 2 + rand_part * 1
         rand_part *= rand_sign
-        noisy_bboxes_expand[negative_idx,:2] = bboxes_cxcywh_expand[negative_idx,:2]+torch.mul(rand_part[negative_idx,2:],bboxes_cxcywh_expand[negative_idx,2:]*0.5)
+        noisy_bboxes_expand[negative_idx, :2] = bboxes_cxcywh_expand[negative_idx, :2] + torch.mul(
+            rand_part[negative_idx, 2:], bboxes_cxcywh_expand[negative_idx, 2:] * 0.5)
         noisy_bboxes_expand = bbox_cxcywh_to_xyxy(noisy_bboxes_expand)
         noisy_bboxes_expand = noisy_bboxes_expand.clamp(min=0.0, max=1.0)
         noisy_bboxes_expand = bbox_xyxy_to_cxcywh(noisy_bboxes_expand)
 
         dn_bbox_query = inverse_sigmoid(noisy_bboxes_expand, eps=1e-3)
         return dn_bbox_query
-
 
     def collate_dn_queries(self, input_label_query: Tensor,
                            input_bbox_query: Tensor, batch_idx: Tensor,
@@ -929,4 +927,3 @@ class CdnQueryGenerator(BaseModule):
             device=device,
             dtype=torch.bool)
         return attn_mask
-

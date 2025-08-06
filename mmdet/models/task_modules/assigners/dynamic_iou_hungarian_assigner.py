@@ -35,29 +35,26 @@ class DynamicIOUHungarianAssigner(BaseAssigner):
     """
 
     def __init__(
-        self,
+            self,
             match_costs: Union[List[Union[dict, ConfigDict]], dict,
-                                 ConfigDict],
-            base_match_num: int  = 1,
+            ConfigDict],
+            base_match_num: int = 1,
             match_num: int = 1,
-            iou_loss_th: float =0.05,
-            total_num_max: int  = 100,
+            iou_loss_th: float = 0.05,
+            total_num_max: int = 100,
             dynamic_match: bool = True,
     ) -> None:
 
         if isinstance(match_costs, dict):
             match_costs = [match_costs]
         elif isinstance(match_costs, list):
-            assert len(match_costs) > 0, \
-                'match_costs must not be a empty list.'
+            assert len(match_costs) > 0, 'match_costs must not be a empty list.'
+        self.match_costs = [TASK_UTILS.build(match_cost) for match_cost in match_costs]
         self.match_num = match_num
         self.dynamic_match = dynamic_match
         self.base_match_num = base_match_num
-        self.iou_loss_th =iou_loss_th
+        self.iou_loss_th = iou_loss_th
         self.total_num_max = total_num_max
-        self.match_costs = [
-            TASK_UTILS.build(match_cost) for match_cost in match_costs
-        ]
 
     def assign(self,
                pred_instances: InstanceData,
@@ -103,11 +100,11 @@ class DynamicIOUHungarianAssigner(BaseAssigner):
         device = gt_labels.device
 
         # 1. assign -1 by default
-        assigned_gt_inds = torch.full((num_preds, ),
+        assigned_gt_inds = torch.full((num_preds,),
                                       -1,
                                       dtype=torch.long,
                                       device=device)
-        assigned_labels = torch.full((num_preds, ),
+        assigned_labels = torch.full((num_preds,),
                                      -1,
                                      dtype=torch.long,
                                      device=device)
@@ -139,8 +136,8 @@ class DynamicIOUHungarianAssigner(BaseAssigner):
 
         # 3. do Hungarian matching on CPU using linear_sum_assignment
         # cost = cost.detach().cpu()
-        cost1 =cost1.detach().cpu()
-        cost2 =cost2.detach().cpu()
+        cost1 = cost1.detach().cpu()
+        cost2 = cost2.detach().cpu()
         cost_max1 = torch.max(cost1)
         cost_max2 = torch.max(cost2)
         if linear_sum_assignment is None:
@@ -148,21 +145,21 @@ class DynamicIOUHungarianAssigner(BaseAssigner):
                               'to install scipy first.')
 
         # lzx
-        match_preds_max =  self.total_num_max #int(num_preds/3)
+        match_preds_max = self.total_num_max  # int(num_preds/3)
         matched_row_inds_all = np.empty((0,), dtype=np.int64)
         matched_col_inds_all = np.empty((0,), dtype=np.int64)
 
         matched_row_inds, matched_col_inds = linear_sum_assignment(cost1)
         matched_row_inds_all = np.concatenate((matched_row_inds_all, matched_row_inds))
         matched_col_inds_all = np.concatenate((matched_col_inds_all, matched_col_inds))
-        if self.match_num>1:
-            th =self.iou_loss_th
+        if self.match_num > 1:
+            th = self.iou_loss_th
             # has_positive = np.any(th > 0)
-        for ii in range(2, self.match_num+1):
+        for ii in range(2, self.match_num + 1):
             if len(matched_col_inds_all) < match_preds_max:
-                cost1[matched_row_inds,:] = cost_max1
+                cost1[matched_row_inds, :] = cost_max1
                 cost2[matched_row_inds, :] = cost_max2
-                if self.dynamic_match and  ii>self.base_match_num:
+                if self.dynamic_match and ii > self.base_match_num:
                     matched_row_inds, matched_col_inds = linear_sum_assignment(cost2)
                     matched_costs = cost2[matched_row_inds, matched_col_inds]
                     filtered_inds = np.where(matched_costs.detach().cpu().numpy() < th)

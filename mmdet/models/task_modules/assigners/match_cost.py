@@ -11,7 +11,6 @@ from mmdet.registry import TASK_UTILS
 from mmdet.structures.bbox import bbox_overlaps, bbox_xyxy_to_cxcywh
 
 
-
 class BaseMatchCost:
     """Base match cost class.
 
@@ -139,9 +138,11 @@ class IoULossCost(BaseMatchCost):
         tensor([[-0.1250,  0.1667],
             [ 0.1667, -0.5000]])
     """
+
     def __init__(self, iou_mode: str = 'giou', weight: Union[float, int] = 1.):
         super().__init__(weight=weight)
         self.iou_mode = iou_mode
+
     def __call__(self,
                  pred_instances: InstanceData,
                  gt_instances: InstanceData,
@@ -317,9 +318,9 @@ class FocalLossCost(BaseMatchCost):
         """
         cls_pred = cls_pred.sigmoid()
         neg_cost = -(1 - cls_pred + self.eps).log() * (
-            1 - self.alpha) * cls_pred.pow(self.gamma)
+                1 - self.alpha) * cls_pred.pow(self.gamma)
         pos_cost = -(cls_pred + self.eps).log() * self.alpha * (
-            1 - cls_pred).pow(self.gamma)
+                1 - cls_pred).pow(self.gamma)
 
         cls_cost = pos_cost[:, gt_labels] - neg_cost[:, gt_labels]
         return cls_cost * self.weight
@@ -341,12 +342,12 @@ class FocalLossCost(BaseMatchCost):
         n = cls_pred.shape[1]
         cls_pred = cls_pred.sigmoid()
         neg_cost = -(1 - cls_pred + self.eps).log() * (
-            1 - self.alpha) * cls_pred.pow(self.gamma)
+                1 - self.alpha) * cls_pred.pow(self.gamma)
         pos_cost = -(cls_pred + self.eps).log() * self.alpha * (
-            1 - cls_pred).pow(self.gamma)
+                1 - cls_pred).pow(self.gamma)
 
         cls_cost = torch.einsum('nc,mc->nm', pos_cost, gt_labels) + \
-            torch.einsum('nc,mc->nm', neg_cost, (1 - gt_labels))
+                   torch.einsum('nc,mc->nm', neg_cost, (1 - gt_labels))
         return cls_cost / n * self.weight
 
     def __call__(self,
@@ -418,10 +419,10 @@ class DiceCost(BaseMatchCost):
         numerator = 2 * torch.einsum('nc,mc->nm', mask_preds, gt_masks)
         if self.naive_dice:
             denominator = mask_preds.sum(-1)[:, None] + \
-                gt_masks.sum(-1)[None, :]
+                          gt_masks.sum(-1)[None, :]
         else:
             denominator = mask_preds.pow(2).sum(1)[:, None] + \
-                gt_masks.pow(2).sum(1)[None, :]
+                          gt_masks.pow(2).sum(1)[None, :]
         loss = 1 - (numerator + self.eps) / (denominator + self.eps)
         return loss
 
@@ -487,7 +488,7 @@ class CrossEntropyLossCost(BaseMatchCost):
         neg = F.binary_cross_entropy_with_logits(
             cls_pred, torch.zeros_like(cls_pred), reduction='none')
         cls_cost = torch.einsum('nc,mc->nm', pos, gt_labels) + \
-            torch.einsum('nc,mc->nm', neg, 1 - gt_labels)
+                   torch.einsum('nc,mc->nm', neg, 1 - gt_labels)
         cls_cost = cls_cost / n
 
         return cls_cost

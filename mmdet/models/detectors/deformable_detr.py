@@ -38,14 +38,16 @@ class DeformableDETR(DetectionTransformer):
             Defaults to 4.
     """
 
-    def __init__(self,
-                 *args,
-                 decoder: OptConfigType = None,
-                 bbox_head: OptConfigType = None,
-                 with_box_refine: bool = False,
-                 as_two_stage: bool = False,
-                 num_feature_levels: int = 4,
-                 **kwargs) -> None:
+    def __init__(
+            self,
+            *args,
+            decoder: OptConfigType = None,
+            bbox_head: OptConfigType = None,
+            with_box_refine: bool = False,
+            as_two_stage: bool = False,
+            num_feature_levels: int = 4,
+            **kwargs
+    ):
         self.with_box_refine = with_box_refine
         self.as_two_stage = as_two_stage
         self.num_feature_levels = num_feature_levels
@@ -72,7 +74,7 @@ class DeformableDETR(DetectionTransformer):
         """Initialize layers except for backbone, neck and bbox_head."""
         self.positional_encoding = SinePositionalEncoding(
             **self.positional_encoding)
-        if self.encoder_layers_num>0:
+        if self.encoder_layers_num > 0:
             self.encoder = DeformableDetrTransformerEncoder(**self.encoder)
         self.decoder = DeformableDetrTransformerDecoder(**self.decoder)
         self.embed_dims = self.encoder.embed_dims
@@ -102,15 +104,15 @@ class DeformableDETR(DetectionTransformer):
     def init_weights(self) -> None:
         """Initialize weights for Transformer and other components."""
         super().init_weights()
-        if self.encoder_layers_num>0:
+        if self.encoder_layers_num > 0:
             for coder in self.encoder, self.decoder:
                 for p in coder.parameters():
                     if p.dim() > 1:
                         nn.init.xavier_uniform_(p)
         else:
-                for p in self.decoder.parameters():
-                    if p.dim() > 1:
-                        nn.init.xavier_uniform_(p)
+            for p in self.decoder.parameters():
+                if p.dim() > 1:
+                    nn.init.xavier_uniform_(p)
         for m in self.modules():
             if isinstance(m, MultiScaleDeformableAttention):
                 m.init_weights()
@@ -205,7 +207,7 @@ class DeformableDETR(DetectionTransformer):
             dtype=torch.long,
             device=feat_flatten.device)
         level_start_index = torch.cat((
-            spatial_shapes.new_zeros((1, )),  # (num_level)
+            spatial_shapes.new_zeros((1,)),  # (num_level)
             spatial_shapes.prod(1).cumsum(0)[:-1]))
         valid_ratios = torch.stack(  # (bs, num_level, 2)
             [self.get_valid_ratio(m) for m in mlvl_masks], 1)
@@ -309,9 +311,9 @@ class DeformableDETR(DetectionTransformer):
                     memory, memory_mask, spatial_shapes)
             enc_outputs_class = self.bbox_head.cls_branches[
                 self.decoder.num_layers](
-                    output_memory)
+                output_memory)
             enc_outputs_coord_unact = self.bbox_head.reg_branches[
-                self.decoder.num_layers](output_memory) + output_proposals
+                                          self.decoder.num_layers](output_memory) + output_proposals
             enc_outputs_coord = enc_outputs_coord_unact.sigmoid()
             # We only use the first channel in enc_outputs_class as foreground,
             # the other (num_classes - 1) channels are actually not used.
@@ -473,7 +475,7 @@ class DeformableDETR(DetectionTransformer):
         _cur = 0  # start index in the sequence of the current level
         for lvl, (H, W) in enumerate(spatial_shapes):
             mask_flatten_ = memory_mask[:,
-                                        _cur:(_cur + H * W)].view(bs, H, W, 1)
+                            _cur:(_cur + H * W)].view(bs, H, W, 1)
             valid_H = torch.sum(~mask_flatten_[:, :, 0, 0], 1).unsqueeze(-1)
             valid_W = torch.sum(~mask_flatten_[:, 0, :, 0], 1).unsqueeze(-1)
 
@@ -486,14 +488,14 @@ class DeformableDETR(DetectionTransformer):
 
             scale = torch.cat([valid_W, valid_H], 1).view(bs, 1, 1, 2)
             grid = (grid.unsqueeze(0).expand(bs, -1, -1, -1) + 0.5) / scale
-            wh = torch.ones_like(grid) * 0.05 * (2.0**lvl)
+            wh = torch.ones_like(grid) * 0.05 * (2.0 ** lvl)
             proposal = torch.cat((grid, wh), -1).view(bs, -1, 4)
             proposals.append(proposal)
             _cur += (H * W)
         output_proposals = torch.cat(proposals, 1)
         output_proposals_valid = ((output_proposals > 0.01) &
                                   (output_proposals < 0.99)).all(
-                                      -1, keepdim=True)
+            -1, keepdim=True)
         # inverse_sigmoid
         output_proposals = torch.log(output_proposals / (1 - output_proposals))
         output_proposals = output_proposals.masked_fill(
@@ -536,7 +538,7 @@ class DeformableDETR(DetectionTransformer):
         scale = 2 * math.pi
         dim_t = torch.arange(
             num_pos_feats, dtype=torch.float32, device=proposals.device)
-        dim_t = temperature**(2 * (dim_t // 2) / num_pos_feats)
+        dim_t = temperature ** (2 * (dim_t // 2) / num_pos_feats)
         # N, L, 4
         proposals = proposals.sigmoid() * scale
         # N, L, 4, 128

@@ -1,6 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import argparse
 import os
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 from mmengine import MMLogger
 from mmengine.config import Config, DictAction
@@ -8,14 +9,13 @@ from mmengine.dist import init_dist
 from mmengine.registry import init_default_scope
 from mmengine.utils import mkdir_or_exist
 
-from mmdet.utils.benchmark import (DataLoaderBenchmark, DatasetBenchmark,
-                                   InferenceBenchmark)
+from mmdet.utils.benchmark import (DataLoaderBenchmark, DatasetBenchmark, InferenceBenchmark)
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description='MMDet benchmark')
-    parser.add_argument('--config',default='./configs/SpecDETR_SPOD_100e.py',help='test config file path')
-    parser.add_argument('--checkpoint',default='./work_dirs/SpecDETR/SpecDETR_SPOD_100e.pth', help='checkpoint file')
+    parser.add_argument('--config', default='./configs/specdetr/SpecDETR_SPOD_100e.py', help='test config file path')
+    parser.add_argument('--checkpoint', default='./work_dirs/SpecDETR/SpecDETR_SPOD_100e.pth', help='checkpoint file')
     parser.add_argument(
         '--task',
         choices=['inference', 'dataloader', 'dataset'],
@@ -36,7 +36,7 @@ def parse_args():
         '--fuse-conv-bn',
         action='store_true',
         help='Whether to fuse conv and bn, this will slightly increase'
-        'the inference speed')
+             'the inference speed')
     parser.add_argument(
         '--dataset-type',
         choices=['train', 'val', 'test'],
@@ -45,17 +45,17 @@ def parse_args():
     parser.add_argument(
         '--work-dir',
         help='the directory to save the file containing '
-        'benchmark metrics')
+             'benchmark metrics')
     parser.add_argument(
         '--cfg-options',
         nargs='+',
         action=DictAction,
         help='override some settings in the used config, the key-value pair '
-        'in xxx=yyy format will be merged into config file. If the value to '
-        'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
-        'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
-        'Note that the quotation marks are necessary and that no white space '
-        'is allowed.')
+             'in xxx=yyy format will be merged into config file. If the value to '
+             'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
+             'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
+             'Note that the quotation marks are necessary and that no white space '
+             'is allowed.')
     parser.add_argument(
         '--launcher',
         choices=['none', 'pytorch', 'slurm', 'mpi'],

@@ -36,19 +36,21 @@ class SinePositionalEncoding(BaseModule):
             Defaults to None
     """
 
-    def __init__(self,
-                 num_feats: int,
-                 temperature: int = 10000,
-                 normalize: bool = False,
-                 scale: float = 2 * math.pi,
-                 eps: float = 1e-6,
-                 offset: float = 0.,
-                 init_cfg: OptMultiConfig = None) -> None:
+    def __init__(
+            self,
+            num_feats: int,
+            temperature: int = 10000,
+            normalize: bool = False,
+            scale: float = 2 * math.pi,
+            eps: float = 1e-6,
+            offset: float = 0.,
+            init_cfg: OptMultiConfig = None
+    ):
         super().__init__(init_cfg=init_cfg)
         if normalize:
-            assert isinstance(scale, (float, int)), 'when normalize is set,' \
-                'scale should be provided and in float or int type, ' \
-                f'found {type(scale)}'
+            assert isinstance(scale, (float, int)), (
+                'when normalize is set, scale should be provided and in float or int type, found {type(scale)}'
+            )
         self.num_feats = num_feats
         self.temperature = temperature
         self.normalize = normalize
@@ -81,7 +83,7 @@ class SinePositionalEncoding(BaseModule):
                       (x_embed[:, :, -1:] + self.eps) * self.scale
         dim_t = torch.arange(
             self.num_feats, dtype=torch.float32, device=mask.device)
-        dim_t = self.temperature**(2 * (dim_t // 2) / self.num_feats)
+        dim_t = self.temperature ** (2 * (dim_t // 2) / self.num_feats)
         pos_x = x_embed[:, :, :, None] / dim_t
         pos_y = y_embed[:, :, :, None] / dim_t
         # use `view` instead of `flatten` for dynamically exporting to ONNX
@@ -122,11 +124,11 @@ class LearnedPositionalEncoding(BaseModule):
     """
 
     def __init__(
-        self,
-        num_feats: int,
-        row_num_embed: int = 50,
-        col_num_embed: int = 50,
-        init_cfg: MultiConfig = dict(type='Uniform', layer='Embedding')
+            self,
+            num_feats: int,
+            row_num_embed: int = 50,
+            col_num_embed: int = 50,
+            init_cfg: MultiConfig = dict(type='Uniform', layer='Embedding')
     ) -> None:
         super().__init__(init_cfg=init_cfg)
         self.row_embed = nn.Embedding(row_num_embed, num_feats)

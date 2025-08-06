@@ -1,0 +1,104 @@
+SpecDetr(
+  (data_preprocessor): HSIDetDataPreprocessor()
+  (backbone): No_backbone_ST(
+    (patch_embed): PatchEmbed(
+      (adap_padding): AdaptivePadding()
+      (projection): Conv2d(30, 256, kernel_size=(1, 1), stride=(1, 1))
+      (norm): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+    )
+    (conv): Conv2d(30, 256, kernel_size=(1, 1), stride=(1, 1))
+    (mlp): Sequential(
+      (0): Linear(in_features=30, out_features=256, bias=True)
+      (1): LeakyReLU(negative_slope=0.2)
+      (2): Linear(in_features=256, out_features=256, bias=True)
+      (3): LeakyReLU(negative_slope=0.2)
+    )
+    (norm): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+  )
+  (bbox_head): SpecDetrHead(
+    (loss_cls): FocalLoss()
+    (loss_bbox): L1Loss()
+    (loss_iou): GIoULoss()
+    (cls_branches): ModuleList(
+      (0-6): 7 x Linear(in_features=256, out_features=8, bias=True)
+    )
+    (reg_branches): ModuleList(
+      (0-6): 7 x Sequential(
+        (0): Linear(in_features=256, out_features=256, bias=True)
+        (1): ReLU()
+        (2): Linear(in_features=256, out_features=256, bias=True)
+        (3): ReLU()
+        (4): Linear(in_features=256, out_features=4, bias=True)
+      )
+    )
+  )
+  (positional_encoding): SinePositionalEncoding()
+  (encoder): SpecDetrTransformerEncoder(
+    (layers): ModuleList(
+      (0-5): 6 x SpecDetrTransformerEncoderLayer(
+        (self_attn): MultiScaleDeformableAttention(
+          (dropout): Dropout(p=0.0, inplace=False)
+          (sampling_offsets): Linear(in_features=256, out_features=128, bias=True)
+          (attention_weights): Linear(in_features=256, out_features=64, bias=True)
+          (value_proj): Linear(in_features=256, out_features=256, bias=True)
+          (output_proj): Linear(in_features=256, out_features=256, bias=True)
+        )
+        (ffn): FFN(
+          (layers): Sequential(
+            (0): Sequential(
+              (0): Linear(in_features=256, out_features=2048, bias=True)
+              (1): ReLU(inplace=True)
+              (2): Dropout(p=0.0, inplace=False)
+            )
+            (1): Linear(in_features=2048, out_features=256, bias=True)
+            (2): Dropout(p=0.0, inplace=False)
+          )
+          (dropout_layer): Identity()
+          (gamma2): Identity()
+        )
+        (norms): ModuleList(
+          (0-1): 2 x LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+        )
+      )
+    )
+  )
+  (decoder): SpecDetrTransformerDecoder(
+    (layers): ModuleList(
+      (0-5): 6 x SpecDetrTransformerDecoderLayer(
+        (cross_attn): MultiScaleDeformableAttention(
+          (dropout): Dropout(p=0.0, inplace=False)
+          (sampling_offsets): Linear(in_features=256, out_features=128, bias=True)
+          (attention_weights): Linear(in_features=256, out_features=64, bias=True)
+          (value_proj): Linear(in_features=256, out_features=256, bias=True)
+          (output_proj): Linear(in_features=256, out_features=256, bias=True)
+        )
+        (ffn): FFN(
+          (layers): Sequential(
+            (0): Sequential(
+              (0): Linear(in_features=256, out_features=2048, bias=True)
+              (1): ReLU(inplace=True)
+              (2): Dropout(p=0.0, inplace=False)
+            )
+            (1): Linear(in_features=2048, out_features=256, bias=True)
+            (2): Dropout(p=0.0, inplace=False)
+          )
+          (dropout_layer): Identity()
+          (gamma2): Identity()
+        )
+        (norms): ModuleList(
+          (0-1): 2 x LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+        )
+      )
+    )
+    (ref_point_head): MLP(
+      (layers): ModuleList(
+        (0): Linear(in_features=512, out_features=256, bias=True)
+        (1): Linear(in_features=256, out_features=256, bias=True)
+      )
+    )
+    (norm): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+  )
+  (memory_trans_fc): Linear(in_features=256, out_features=256, bias=True)
+  (memory_trans_norm): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+  (dn_query_generator): CdnQueryGenerator()
+)

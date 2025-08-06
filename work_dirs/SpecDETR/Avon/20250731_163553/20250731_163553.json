@@ -1,0 +1,15 @@
+{
+  "coco/BlueTrap_precision": 0.013,
+  "coco/BrownTrap_precision": 0.009,
+  "coco/bbox_mAP": 0.011,
+  "coco/bbox_mAP_50": 0.027,
+  "coco/bbox_mAP_75": 0.004,
+  "coco/bbox_mAP_s": 0.011,
+  "coco/bbox_mAP_m": -1.0,
+  "coco/bbox_mAP_l": -1.0,
+  "coco/AR@100": 0.05416666666666666,
+  "coco/AR@300": 0.05416666666666666,
+  "coco/AR@1000": 0.05416666666666666,
+  "data_time": 3.11657977104187,
+  "time": 4.731405735015869
+}

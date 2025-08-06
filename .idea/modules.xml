@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/SpecDETR.iml" filepath="$PROJECT_DIR$/.idea/SpecDETR.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/HOD_SpecDETR.iml" filepath="$PROJECT_DIR$/.idea/HOD_SpecDETR.iml" />
     </modules>
   </component>
 </project>

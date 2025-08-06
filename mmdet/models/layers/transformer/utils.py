@@ -68,7 +68,7 @@ def coordinate_to_encoding(coord_tensor: Tensor,
     """
     dim_t = torch.arange(
         num_feats, dtype=torch.float32, device=coord_tensor.device)
-    dim_t = temperature**(2 * (dim_t // 2) / num_feats)
+    dim_t = temperature ** (2 * (dim_t // 2) / num_feats)
     x_embed = coord_tensor[..., 0] * scale
     y_embed = coord_tensor[..., 1] * scale
     pos_x = x_embed[..., None] / dim_t
@@ -213,18 +213,20 @@ class PatchEmbed(BaseModule):
             initialization. Default: None.
     """
 
-    def __init__(self,
-                 in_channels: int = 3,
-                 embed_dims: int = 768,
-                 conv_type: str = 'Conv2d',
-                 kernel_size: int = 16,
-                 stride: int = 16,
-                 padding: Union[int, tuple, str] = 'corner',
-                 dilation: int = 1,
-                 bias: bool = True,
-                 norm_cfg: OptConfigType = None,
-                 input_size: Union[int, tuple] = None,
-                 init_cfg: OptConfigType = None) -> None:
+    def __init__(
+            self,
+            in_channels: int = 3,
+            embed_dims: int = 768,
+            conv_type: str = 'Conv2d',
+            kernel_size: int = 16,
+            stride: int = 16,
+            padding: Union[int, tuple, str] = 'corner',
+            dilation: int = 1,
+            bias: bool = True,
+            norm_cfg: OptConfigType = None,
+            input_size: Union[int, tuple] = None,
+            init_cfg: OptConfigType = None
+    ):
         super(PatchEmbed, self).__init__(init_cfg=init_cfg)
 
         self.embed_dims = embed_dims
@@ -240,7 +242,8 @@ class PatchEmbed(BaseModule):
                 kernel_size=kernel_size,
                 stride=stride,
                 dilation=dilation,
-                padding=padding)
+                padding=padding
+            )
             # disable the padding of conv
             padding = 0
         else:
@@ -255,7 +258,8 @@ class PatchEmbed(BaseModule):
             stride=stride,
             padding=padding,
             dilation=dilation,
-            bias=bias)
+            bias=bias
+        )
 
         if norm_cfg is not None:
             self.norm = build_norm_layer(norm_cfg, embed_dims)[1]
@@ -545,7 +549,7 @@ class ConditionalAttention(BaseModule):
         v_head_dims = self.embed_dims // self.num_heads
         assert head_dims * self.num_heads == hidden_dims, \
             f'{"hidden_dims must be divisible by num_heads"}'
-        scaling = float(head_dims)**-0.5
+        scaling = float(head_dims) ** -0.5
 
         q = query * scaling
         k = key
@@ -557,8 +561,8 @@ class ConditionalAttention(BaseModule):
                    attn_mask.dtype == torch.float16 or \
                    attn_mask.dtype == torch.uint8 or \
                    attn_mask.dtype == torch.bool, \
-                   'Only float, byte, and bool types are supported for \
-                    attn_mask'
+                'Only float, byte, and bool types are supported for \
+                 attn_mask'
 
             if attn_mask.dtype == torch.uint8:
                 warnings.warn('Byte tensor for attn_mask is deprecated.\
@@ -571,9 +575,9 @@ class ConditionalAttention(BaseModule):
                         'The size of the 2D attn_mask is not correct.')
             elif attn_mask.dim() == 3:
                 if list(attn_mask.size()) != [
-                        bs * self.num_heads,
-                        query.size(1),
-                        key.size(1)
+                    bs * self.num_heads,
+                    query.size(1),
+                    key.size(1)
                 ]:
                     raise RuntimeError(
                         'The size of the 3D attn_mask is not correct.')
@@ -745,13 +749,11 @@ class MLP(BaseModule):
             layer of MLP only contains FFN (Linear).
     """
 
-    def __init__(self, input_dim: int, hidden_dim: int, output_dim: int,
-                 num_layers: int) -> None:
+    def __init__(self, input_dim: int, hidden_dim: int, output_dim: int, num_layers: int) -> None:
         super().__init__()
         self.num_layers = num_layers
         h = [hidden_dim] * (num_layers - 1)
-        self.layers = ModuleList(
-            Linear(n, k) for n, k in zip([input_dim] + h, h + [output_dim]))
+        self.layers = ModuleList(Linear(n, k) for n, k in zip([input_dim] + h, h + [output_dim]))
 
     def forward(self, x: Tensor) -> Tensor:
         """Forward function of MLP.
@@ -825,7 +827,7 @@ class DynamicConv(BaseModule):
 
         self.activation = build_activation_layer(act_cfg)
 
-        num_output = self.out_channels * input_feat_shape**2
+        num_output = self.out_channels * input_feat_shape ** 2
         if self.with_proj:
             self.fc_layer = nn.Linear(num_output, self.out_channels)
             self.fc_norm = build_norm_layer(norm_cfg, self.out_channels)[1]

@@ -1,6 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import argparse
 import os
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 import os.path as osp
 import warnings
@@ -20,7 +21,7 @@ from mmdet.utils import setup_cache_size_limit_of_dynamo
 def parse_args():
     parser = argparse.ArgumentParser(
         description='MMDet test (and eval) a model')
-    parser.add_argument('--dataset', default='SPOD',  help='choose dataset, Avon SPOD Sandiego MUUFLGulfport IRAir')
+    parser.add_argument('--dataset', default='SPOD', help='choose dataset, Avon SPOD Sandiego MUUFLGulfport IRAir')
     if parser.parse_args().dataset == 'SPOD':
         parser.add_argument('--config', default='./configs/specdetr/SpecDETR_SPOD_100e.py',
                             help='test config file path')
@@ -28,11 +29,11 @@ def parse_args():
                             default='./work_dirs/SpecDETR/SpecDETR_SPOD_100e.pth',
                             help='checkpoint file')
         parser.add_argument(
-            '--work-dir',default='./work_dirs/SpecDETR/SPOD',
+            '--work-dir', default='./work_dirs/SpecDETR/SPOD',
             help='the directory to save the file containing evaluation metrics')
         parser.add_argument(
             '--out',
-            type=str,default='./work_dirs/SpecDETR/SPOD/SpecDETR.pkl',
+            type=str, default='./work_dirs/SpecDETR/SPOD/SpecDETR.pkl',
             help='dump predictions to a pickle file for offline evaluation')
     elif parser.parse_args().dataset == 'Sandiego':
         parser.add_argument('--config', default='./configs/specdetr/SpecDETR_Sandiego_12e.py',
@@ -41,11 +42,11 @@ def parse_args():
                             default='./work_dirs/SpecDETR/SpecDETR_Sandiego_12e.pth',
                             help='checkpoint file')
         parser.add_argument(
-            '--work-dir',default='./work_dirs/SpecDETR/Sandiego',
+            '--work-dir', default='./work_dirs/SpecDETR/Sandiego',
             help='the directory to save the file containing evaluation metrics')
         parser.add_argument(
             '--out',
-            type=str,default='./work_dirs/SpecDETR/Sandiego/SpecDETR.pkl',
+            type=str, default='./work_dirs/SpecDETR/Sandiego/SpecDETR.pkl',
             help='dump predictions to a pickle file for offline evaluation')
     elif parser.parse_args().dataset == 'Avon':
         parser.add_argument('--config', default='./configs/specdetr/SpecDETR_Avon_36e.py',
@@ -54,11 +55,11 @@ def parse_args():
                             default='./work_dirs/SpecDETR/SpecDETR_Avon_36e.pth',
                             help='checkpoint file')
         parser.add_argument(
-            '--work-dir',default='./work_dirs/SpecDETR/Avon',
+            '--work-dir', default='./work_dirs/SpecDETR/Avon',
             help='the directory to save the file containing evaluation metrics')
         parser.add_argument(
             '--out',
-            type=str,default='./work_dirs/SpecDETR/Avon/SpecDETR.pkl',
+            type=str, default='./work_dirs/SpecDETR/Avon/SpecDETR.pkl',
             help='dump predictions to a pickle file for offline evaluation')
     elif parser.parse_args().dataset == 'MUUFLGulfport':
         parser.add_argument('--config', default='./configs/specdetr/SpecDETR_MUUFLGulfport_24e.py',
@@ -67,11 +68,11 @@ def parse_args():
                             default='./work_dirs/SpecDETR/SpecDETR_MUUFLGulfport_24e.pth',
                             help='checkpoint file')
         parser.add_argument(
-            '--work-dir',default='./work_dirs/SpecDETR/MUUFLGulfport',
+            '--work-dir', default='./work_dirs/SpecDETR/MUUFLGulfport',
             help='the directory to save the file containing evaluation metrics')
         parser.add_argument(
             '--out',
-            type=str,default='./work_dirs/SpecDETR/MUUFLGulfport/SpecDETR.pkl',
+            type=str, default='./work_dirs/SpecDETR/MUUFLGulfport/SpecDETR.pkl',
             help='dump predictions to a pickle file for offline evaluation')
     elif parser.parse_args().dataset == 'IRAir':
         parser.add_argument('--config', default='./configs/specdetr/SpecDETR_IRAir_12e.py',
@@ -80,11 +81,11 @@ def parse_args():
                             default='./work_dirs/SpecDETR/SpecDETR_IRAir_12e.pth',
                             help='checkpoint file')
         parser.add_argument(
-            '--work-dir',default='./work_dirs/SpecDETR/IRAir',
+            '--work-dir', default='./work_dirs/SpecDETR/IRAir',
             help='the directory to save the file containing evaluation metrics')
         parser.add_argument(
             '--out',
-            type=str,default='./work_dirs/SpecDETR/IRAir/SpecDETR.pkl',
+            type=str, default='./work_dirs/SpecDETR/IRAir/SpecDETR.pkl',
             help='dump predictions to a pickle file for offline evaluation')
     else:
         raise ValueError("Invalid dataset. Please ensure the dataset is Avon, SPOD, Sandiego or  MUUFLGulfport.")
@@ -93,8 +94,8 @@ def parse_args():
     parser.add_argument(
         '--show-dir',
         help='directory where painted images will be saved. '
-        'If specified, it will be automatically saved '
-        'to the work_dir/timestamp/show_dir')
+             'If specified, it will be automatically saved '
+             'to the work_dir/timestamp/show_dir')
     parser.add_argument(
         '--wait-time', type=float, default=2, help='the interval of show (s)')
     parser.add_argument(
@@ -102,11 +103,11 @@ def parse_args():
         nargs='+',
         action=DictAction,
         help='override some settings in the used config, the key-value pair '
-        'in xxx=yyy format will be merged into config file. If the value to '
-        'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
-        'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
-        'Note that the quotation marks are necessary and that no white space '
-        'is allowed.')
+             'in xxx=yyy format will be merged into config file. If the value to '
+             'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
+             'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
+             'Note that the quotation marks are necessary and that no white space '
+             'is allowed.')
     parser.add_argument(
         '--launcher',
         choices=['none', 'pytorch', 'slurm', 'mpi'],
@@ -124,11 +125,9 @@ def parse_args():
 
 
 def main():
-
     args = parse_args()
 
-    # Reduce the number of repeated compilations and improve
-    # testing speed.
+    # Reduce the number of repeated compilations and improve testing speed.
     setup_cache_size_limit_of_dynamo()
 
     # load config
@@ -208,4 +207,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

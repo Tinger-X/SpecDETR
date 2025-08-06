@@ -1,0 +1,17 @@
+{
+  "coco/Brown_precision": 0.0,
+  "coco/DarkGreen_precision": 0.0,
+  "coco/PeaGreen_precision": 0.0,
+  "coco/FauxVineyardGreen_precision": 0.0,
+  "coco/bbox_mAP": 0.0,
+  "coco/bbox_mAP_50": 0.0,
+  "coco/bbox_mAP_75": 0.0,
+  "coco/bbox_mAP_s": 0.0,
+  "coco/bbox_mAP_m": -1.0,
+  "coco/bbox_mAP_l": -1.0,
+  "coco/AR@100": 0.0,
+  "coco/AR@300": 0.0,
+  "coco/AR@1000": 0.0,
+  "data_time": 1.421708583831787,
+  "time": 5.276401877403259
+}

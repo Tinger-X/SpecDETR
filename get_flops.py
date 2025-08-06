@@ -4,6 +4,7 @@ import tempfile
 from functools import partial
 from pathlib import Path
 import os
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import numpy as np
 import torch
@@ -24,7 +25,7 @@ except ImportError:
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Get a detector flops')
-    parser.add_argument('--config',default='./configs/SpecDETR_SPOD_100e.py', help='train config file path')
+    parser.add_argument('--config', default='./configs/specdetr/SpecDETR_SPOD_100e.py', help='train config file path')
     parser.add_argument(
         '--num-images',
         type=int,
@@ -35,11 +36,11 @@ def parse_args():
         nargs='+',
         action=DictAction,
         help='override some settings in the used config, the key-value pair '
-        'in xxx=yyy format will be merged into config file. If the value to '
-        'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
-        'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
-        'Note that the quotation marks are necessary and that no white space '
-        'is allowed.')
+             'in xxx=yyy format will be merged into config file. If the value to '
+             'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
+             'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
+             'Note that the quotation marks are necessary and that no white space '
+             'is allowed.')
     args = parser.parse_args()
     return args
 

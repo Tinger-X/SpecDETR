@@ -97,8 +97,7 @@ class DETRHead(BaseModule):
             self.bg_cls_weight = bg_cls_weight
 
         if train_cfg:
-            assert 'assigner' in train_cfg, 'assigner should be provided ' \
-                                            'when train_cfg is set.'
+            assert 'assigner' in train_cfg, 'assigner should be provided when train_cfg is set.'
             assigner = train_cfg['assigner']
             self.assigner = TASK_UTILS.build(assigner)
             if train_cfg.get('sampler', None) is not None:

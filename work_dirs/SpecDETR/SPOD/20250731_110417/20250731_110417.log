@@ -1,0 +1,352 @@
+2025/07/31 11:04:19 - mmengine - INFO - 
+------------------------------------------------------------
+System environment:
+    sys.platform: win32
+    Python: 3.11.6 (tags/v3.11.6:8b6ee5b, Oct  2 2023, 14:57:12) [MSC v.1935 64 bit (AMD64)]
+    CUDA available: False
+    numpy_random_seed: 1756613123
+    MSVC: 用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.44.35213 版
+    GCC: n/a
+    PyTorch: 2.5.1+cu124
+    PyTorch compiling details: PyTorch built with:
+  - C++ Version: 201703
+  - MSVC 192930154
+  - Intel(R) oneAPI Math Kernel Library Version 2024.2.2-Product Build 20240823 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v3.5.3 (Git Hash 66f0cb9eb66affd2da3bf5f8d897376f04aae6af)
+  - OpenMP 2019
+  - LAPACK is enabled (usually provided by MKL)
+  - CPU capability usage: AVX2
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=12.4, CUDNN_VERSION=9.1.0, CXX_COMPILER=C:/actions-runner/_work/pytorch/pytorch/builder/windows/tmp_bin/sccache-cl.exe, CXX_FLAGS=/DWIN32 /D_WINDOWS /GR /EHsc /Zc:__cplusplus /bigobj /FS /utf-8 -DUSE_PTHREADPOOL -DNDEBUG -DUSE_KINETO -DLIBKINETO_NOCUPTI -DLIBKINETO_NOROCTRACER -DLIBKINETO_NOXPUPTI=ON -DUSE_FBGEMM -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE /wd4624 /wd4068 /wd4067 /wd4267 /wd4661 /wd4717 /wd4244 /wd4804 /wd4273, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, TORCH_VERSION=2.5.1, USE_CUDA=ON, USE_CUDNN=ON, USE_CUSPARSELT=OFF, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_GLOO=ON, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=OFF, USE_NNPACK=OFF, USE_OPENMP=ON, USE_ROCM=OFF, USE_ROCM_KERNEL_ASSERT=OFF, 
+
+    TorchVision: 0.20.1+cu124
+    OpenCV: 4.10.0
+    MMEngine: 0.7.3
+
+Runtime environment:
+    cudnn_benchmark: False
+    mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
+    dist_cfg: {'backend': 'nccl'}
+    seed: None
+    Distributed launcher: none
+    Distributed training: False
+    GPU number: 1
+------------------------------------------------------------
+
+2025/07/31 11:04:19 - mmengine - INFO - Config:
+dataset_type = 'HSIDataset'
+data_root = 'S:/HSI/SpecDETR/SPOD_30b_8c/'
+normalized_basis = 3000
+backend_args = None
+train_pipeline = [
+    dict(
+        type='LoadHyperspectralImageFromFiles',
+        to_float32=True,
+        normalized_basis=3000),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(type='HSIResize', scale_factor=1, keep_ratio=True),
+    dict(type='RandomFlip', prob=0.5),
+    dict(
+        type='PackDetInputs',
+        meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape', 'flip',
+                   'flip_direction', 'scale_factor'))
+]
+test_pipeline = [
+    dict(
+        type='LoadHyperspectralImageFromFiles',
+        to_float32=True,
+        normalized_basis=3000),
+    dict(type='HSIResize', scale_factor=1, keep_ratio=True),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(
+        type='PackDetInputs',
+        meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape',
+                   'scale_factor'))
+]
+train_dataloader = dict(
+    batch_size=4,
+    num_workers=2,
+    persistent_workers=True,
+    sampler=dict(type='DefaultSampler', shuffle=True),
+    batch_sampler=dict(type='AspectRatioBatchSampler'),
+    dataset=dict(
+        type='HSIDataset',
+        data_root='S:/HSI/SpecDETR/SPOD_30b_8c/',
+        ann_file='annotations/train.json',
+        data_prefix=dict(img='train/'),
+        filter_cfg=dict(filter_empty_gt=True, min_size=32),
+        pipeline=[
+            dict(
+                type='LoadHyperspectralImageFromFiles',
+                to_float32=True,
+                normalized_basis=3000),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(type='HSIResize', scale_factor=1, keep_ratio=True),
+            dict(type='RandomFlip', prob=0.5),
+            dict(
+                type='PackDetInputs',
+                meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape',
+                           'flip', 'flip_direction', 'scale_factor'))
+        ],
+        backend_args=None))
+val_dataloader = dict(
+    batch_size=1,
+    num_workers=2,
+    persistent_workers=True,
+    drop_last=False,
+    sampler=dict(type='DefaultSampler', shuffle=False),
+    dataset=dict(
+        type='HSIDataset',
+        data_root='S:/HSI/SpecDETR/SPOD_30b_8c/',
+        ann_file='annotations/test.json',
+        data_prefix=dict(img='test/'),
+        test_mode=True,
+        pipeline=[
+            dict(
+                type='LoadHyperspectralImageFromFiles',
+                to_float32=True,
+                normalized_basis=3000),
+            dict(type='HSIResize', scale_factor=1, keep_ratio=True),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(
+                type='PackDetInputs',
+                meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape',
+                           'scale_factor'))
+        ],
+        backend_args=None))
+test_dataloader = dict(
+    batch_size=1,
+    num_workers=2,
+    persistent_workers=True,
+    drop_last=False,
+    sampler=dict(type='DefaultSampler', shuffle=False),
+    dataset=dict(
+        type='HSIDataset',
+        data_root='S:/HSI/SpecDETR/SPOD_30b_8c/',
+        ann_file='annotations/test.json',
+        data_prefix=dict(img='test/'),
+        test_mode=True,
+        pipeline=[
+            dict(
+                type='LoadHyperspectralImageFromFiles',
+                to_float32=True,
+                normalized_basis=3000),
+            dict(type='HSIResize', scale_factor=1, keep_ratio=True),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(
+                type='PackDetInputs',
+                meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape',
+                           'scale_factor'))
+        ],
+        backend_args=None))
+val_evaluator = dict(
+    type='CocoMetric',
+    ann_file='S:/HSI/SpecDETR/SPOD_30b_8c/annotations/test.json',
+    metric=['bbox', 'proposal_fast'],
+    classwise=True,
+    format_only=False,
+    backend_args=None)
+test_evaluator = dict(
+    type='CocoMetric',
+    ann_file='S:/HSI/SpecDETR/SPOD_30b_8c/annotations/test.json',
+    metric=['bbox', 'proposal_fast'],
+    classwise=True,
+    format_only=False,
+    backend_args=None)
+default_scope = 'mmdet'
+default_hooks = dict(
+    timer=dict(type='IterTimerHook'),
+    logger=dict(type='LoggerHook', interval=50),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    checkpoint=dict(type='CheckpointHook', interval=999999, by_epoch=True),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    visualization=dict(type='DetVisualizationHook'))
+env_cfg = dict(
+    cudnn_benchmark=False,
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0),
+    dist_cfg=dict(backend='nccl'))
+vis_backends = [dict(type='LocalVisBackend')]
+visualizer = dict(
+    type='DetLocalVisualizer',
+    vis_backends=[dict(type='LocalVisBackend')],
+    name='visualizer')
+log_processor = dict(type='LogProcessor', window_size=50, by_epoch=True)
+log_level = 'INFO'
+load_from = './work_dirs/SpecDETR/SpecDETR_SPOD_100e.pth'
+resume = False
+norm = 'LN'
+num_levels = 2
+in_channels = 30
+embed_dims = 256
+query_initial = 'one'
+model = dict(
+    type='SpecDetr',
+    num_queries=900,
+    num_query_per_cat=5,
+    num_fix_query=0,
+    with_box_refine=True,
+    as_two_stage=True,
+    num_feature_levels=2,
+    candidate_bboxes_size=0.01,
+    scale_gt_bboxes_size=0,
+    training_dn=True,
+    dn_type='CDN',
+    query_initial='one',
+    remove_last_candidate=True,
+    data_preprocessor=dict(type='HSIDetDataPreprocessor'),
+    backbone=dict(
+        type='No_backbone_ST',
+        in_channels=30,
+        embed_dims=256,
+        num_levels=2,
+        norm_cfg=dict(type='LN')),
+    encoder=dict(
+        num_layers=6,
+        layer_cfg=dict(
+            self_attn_cfg=dict(
+                embed_dims=256, num_levels=2, num_points=4, dropout=0.0),
+            ffn_cfg=dict(
+                embed_dims=256, feedforward_channels=2048, ffn_drop=0.0),
+            norm_cfg=dict(type='LN'))),
+    decoder=dict(
+        num_layers=6,
+        return_intermediate=True,
+        layer_cfg=dict(
+            self_attn_cfg=dict(embed_dims=256, num_heads=8, dropout=0.0),
+            cross_attn_cfg=dict(
+                embed_dims=256, num_levels=2, num_points=4, dropout=0.0),
+            ffn_cfg=dict(
+                embed_dims=256, feedforward_channels=2048, ffn_drop=0.0),
+            norm_cfg=dict(type='LN')),
+        post_norm_cfg=None),
+    positional_encoding=dict(
+        num_feats=128, normalize=True, offset=0.0, temperature=20),
+    bbox_head=dict(
+        type='SpecDetrHead',
+        num_classes=8,
+        sync_cls_avg_factor=True,
+        pre_bboxes_round=False,
+        use_nms=True,
+        iou_threshold=0.01,
+        embed_dims=256,
+        loss_cls=dict(
+            type='FocalLoss',
+            use_sigmoid=True,
+            gamma=2.0,
+            alpha=0.25,
+            loss_weight=1.0),
+        loss_bbox=dict(type='L1Loss', loss_weight=5.0),
+        loss_iou=dict(type='GIoULoss', loss_weight=2.0)),
+    dn_cfg=dict(
+        label_noise_scale=0.5,
+        box_noise_scale=1.5,
+        group_cfg=dict(dynamic=True, num_groups=None, num_dn_queries=200)),
+    train_cfg=dict(
+        assigner=dict(
+            type='DynamicIOUHungarianAssigner',
+            match_costs=[
+                dict(type='FocalLossCost', weight=2.0),
+                dict(type='BBoxL1Cost', weight=5.0, box_format='xywh'),
+                dict(type='IoUCost', iou_mode='giou', weight=2.0),
+                dict(type='IoULossCost', iou_mode='iou', weight=1.0)
+            ],
+            match_num=10,
+            base_match_num=1,
+            iou_loss_th=0.05,
+            dynamic_match=True)),
+    test_cfg=dict(max_per_img=300))
+optim_wrapper = dict(
+    type='OptimWrapper',
+    optimizer=dict(type='AdamW', lr=0.0001, weight_decay=0.0001),
+    clip_grad=dict(max_norm=0.1, norm_type=2),
+    paramwise_cfg=dict(custom_keys=dict(backbone=dict(lr_mult=0.1))))
+max_epochs = 100
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=100, val_interval=20)
+val_cfg = dict(type='ValLoop')
+test_cfg = dict(type='TestLoop')
+param_scheduler = [
+    dict(
+        type='MultiStepLR',
+        begin=0,
+        end=100,
+        by_epoch=True,
+        milestones=[90],
+        gamma=0.1)
+]
+auto_scale_lr = dict(base_batch_size=4)
+launcher = 'none'
+work_dir = './work_dirs/SpecDETR/SPOD'
+
+2025/07/31 11:04:20 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+2025/07/31 11:04:20 - mmengine - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+before_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DistSamplerSeedHook                
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) IterTimerHook                      
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_val_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DetVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_val_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_train:
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_test_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_test_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_test_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DetVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_run:
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+2025/07/31 11:04:21 - mmengine - WARNING - The prefix is not set in metric class DumpDetResults.
+2025/07/31 11:04:21 - mmengine - INFO - Load checkpoint from ./work_dirs/SpecDETR/SpecDETR_SPOD_100e.pth

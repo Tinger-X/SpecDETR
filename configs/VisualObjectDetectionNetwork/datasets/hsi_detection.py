@@ -1,6 +1,6 @@
 # dataset settings
 dataset_type = 'HSIDataset'
-data_root = '/media/ubuntu/data/HTD_dataset/SPOD_30b_8c/'
+data_root = 'S:/HSI/SpecDETR/SPOD_30b_8c/'
 # data_root = '/media/ubuntu/dataset/HSI/my_HTD_dataset/htd3b/'
 # Example to use different file client
 # Method 1: simply set the data root and let the file I/O module

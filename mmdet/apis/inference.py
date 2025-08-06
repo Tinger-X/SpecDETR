@@ -22,11 +22,11 @@ from ..utils import get_test_pipeline_cfg
 
 
 def init_detector(
-    config: Union[str, Path, Config],
-    checkpoint: Optional[str] = None,
-    palette: str = 'none',
-    device: str = 'cuda:0',
-    cfg_options: Optional[dict] = None,
+        config: Union[str, Path, Config],
+        checkpoint: Optional[str] = None,
+        palette: str = 'none',
+        device: str = 'cuda:0',
+        cfg_options: Optional[dict] = None,
 ) -> nn.Module:
     """Initialize a detector from config file.
 
@@ -115,9 +115,9 @@ ImagesType = Union[str, np.ndarray, Sequence[str], Sequence[np.ndarray]]
 
 
 def inference_detector(
-    model: nn.Module,
-    imgs: ImagesType,
-    test_pipeline: Optional[Compose] = None
+        model: nn.Module,
+        imgs: ImagesType,
+        test_pipeline: Optional[Compose] = None
 ) -> Union[DetDataSample, SampleList]:
     """Inference image(s) with the detector.
 

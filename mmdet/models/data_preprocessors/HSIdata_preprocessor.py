@@ -30,9 +30,6 @@ except ImportError:
     skimage = None
 
 
-
-
-
 @MODELS.register_module()
 class HSIImgDataPreprocessor(BaseDataPreprocessor):
     """Image pre-processor for normalization and bgr to rgb conversion.
@@ -86,21 +83,20 @@ class HSIImgDataPreprocessor(BaseDataPreprocessor):
         corresponding values.
     """
 
-    def __init__(self,
-                 mean: Optional[Sequence[Union[float, int]]] = None,
-                 std: Optional[Sequence[Union[float, int]]] = None,
-                 pad_size_divisor: int = 1,
-                 pad_value: Union[float, int] = 0,
-                 non_blocking: Optional[bool] = False):
+    def __init__(
+            self,
+            mean: Optional[Sequence[Union[float, int]]] = None,
+            std: Optional[Sequence[Union[float, int]]] = None,
+            pad_size_divisor: int = 1,
+            pad_value: Union[float, int] = 0,
+            non_blocking: Optional[bool] = False
+    ):
         super().__init__(non_blocking)
-        assert (mean is None) == (std is None), (
-            'mean and std should be both None or tuple')
+        assert (mean is None) == (std is None), 'mean and std should be both None or tuple'
         if mean is not None:
             self._enable_normalize = True
-            self.register_buffer('mean',
-                                 torch.tensor(mean).view(-1, 1, 1), False)
-            self.register_buffer('std',
-                                 torch.tensor(std).view(-1, 1, 1), False)
+            self.register_buffer('mean', torch.tensor(mean).view(-1, 1, 1), False)
+            self.register_buffer('std', torch.tensor(std).view(-1, 1, 1), False)
         else:
             self._enable_normalize = False
         self.pad_size_divisor = pad_size_divisor
@@ -163,6 +159,7 @@ class HSIImgDataPreprocessor(BaseDataPreprocessor):
         data.setdefault('data_samples', None)
         return data
 
+
 @MODELS.register_module()
 class HSIDetDataPreprocessor(HSIImgDataPreprocessor):
     """Image pre-processor for detection tasks.
@@ -210,27 +207,29 @@ class HSIDetDataPreprocessor(HSIImgDataPreprocessor):
         batch_augments (list[dict], optional): Batch-level augmentations
     """
 
-    def __init__(self,
-                 mean: Sequence[Number] = None,
-                 std: Sequence[Number] = None,
-                 pad_size_divisor: int = 1,
-                 pad_value: Union[float, int] = 0,
-                 pad_mask: bool = False,
-                 mask_pad_value: int = 0,
-                 pad_seg: bool = False,
-                 seg_pad_value: int = 255,
-                 boxtype2tensor: bool = True,
-                 non_blocking: Optional[bool] = False,
-                 batch_augments: Optional[List[dict]] = None):
+    def __init__(
+            self,
+            mean: Sequence[Number] = None,
+            std: Sequence[Number] = None,
+            pad_size_divisor: int = 1,
+            pad_value: Union[float, int] = 0,
+            pad_mask: bool = False,
+            mask_pad_value: int = 0,
+            pad_seg: bool = False,
+            seg_pad_value: int = 255,
+            boxtype2tensor: bool = True,
+            non_blocking: Optional[bool] = False,
+            batch_augments: Optional[List[dict]] = None
+    ):
         super().__init__(
             mean=mean,
             std=std,
             pad_size_divisor=pad_size_divisor,
             pad_value=pad_value,
-            non_blocking=non_blocking)
+            non_blocking=non_blocking
+        )
         if batch_augments is not None:
-            self.batch_augments = nn.ModuleList(
-                [MODELS.build(aug) for aug in batch_augments])
+            self.batch_augments = nn.ModuleList([MODELS.build(aug) for aug in batch_augments])
         else:
             self.batch_augments = None
         self.pad_mask = pad_mask
@@ -331,7 +330,7 @@ class HSIDetDataPreprocessor(HSIImgDataPreprocessor):
                      batch_data_samples: Sequence[DetDataSample]) -> None:
         """Pad gt_masks to shape of batch_input_shape."""
         for data_samples in batch_data_samples:
-            seg=data_samples.gt_pixel.seg
+            seg = data_samples.gt_pixel.seg
             h, w = data_samples.gt_pixel.shape[-2:]
             pad_h, pad_w = data_samples.batch_input_shape
             seg = F.pad(
@@ -348,8 +347,7 @@ class HSIDetDataPreprocessor(HSIImgDataPreprocessor):
                     value=0)
                 data_samples.gt_pixel = PixelData(seg=seg, abu=abu)
             else:
-                data_samples.gt_pixel = PixelData(seg=seg,)
-
+                data_samples.gt_pixel = PixelData(seg=seg, )
 
     def pad_gt_sem_seg(self,
                        batch_data_samples: Sequence[DetDataSample]) -> None:
@@ -365,4 +363,3 @@ class HSIDetDataPreprocessor(HSIImgDataPreprocessor):
                     mode='constant',
                     value=self.seg_pad_value)
                 data_samples.gt_sem_seg = PixelData(sem_seg=gt_sem_seg)
-

@@ -1,29 +1,29 @@
 _base_ = [
     '../_base_/datasets/hsi_detection_Avon.py', '../_base_/default_runtime.py'
 ]
-#hsi_detection_avon_1
+# hsi_detection_avon_1
 # fp16 = dict(loss_scale=512.)
 # pretrained = 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_large_patch4_window12_384_22k.pth'  # noqa
-norm = 'LN'  #'IN1d' 'LN''BN1d'
+norm = 'LN'  # 'IN1d' 'LN''BN1d'
 num_levels = 2
 in_channels = 360
 embed_dims = 256  # embed_dims256
 query_initial = 'one'
 model = dict(
     type='SpecDetr',
-    num_queries = 900,  # num_matching_queries 900
-    num_query_per_cat= 5,
-    num_fix_query = 0,
+    num_queries=900,  # num_matching_queries 900
+    num_query_per_cat=5,
+    num_fix_query=0,
     with_box_refine=True,
     as_two_stage=True,
     num_feature_levels=num_levels,
-    candidate_bboxes_size = 0.01, #  initial candidate_bboxes after encode 0.01
-    scale_gt_bboxes_size = 0,  # [0,0.5)  0.25,
-    training_dn = True,  #  use dn when training
+    candidate_bboxes_size=0.01,  # initial candidate_bboxes after encode 0.01
+    scale_gt_bboxes_size=0,  # [0,0.5)  0.25,
+    training_dn=True,  # use dn when training
     # dn_only_pos = False,
     dn_type='CDN',  # DN CDNV1 CDN
-    query_initial= query_initial,
-    remove_last_candidate = False,  # when the last feacture size of backbone is 1
+    query_initial=query_initial,
+    remove_last_candidate=False,  # when the last feacture size of backbone is 1
     data_preprocessor=dict(
         type='HSIDetDataPreprocessor'),
     backbone=dict(
@@ -39,29 +39,31 @@ model = dict(
     encoder=dict(
         num_layers=6,
         layer_cfg=dict(
-            self_attn_cfg=dict(embed_dims=embed_dims, num_levels=num_levels, num_points=4, # local_attn_type ='fix_same_orientation',
+            self_attn_cfg=dict(embed_dims=embed_dims, num_levels=num_levels, num_points=4,
+                               # local_attn_type ='fix_same_orientation',
                                dropout=0.0),  # 0.1 for DeformDETR
             ffn_cfg=dict(
                 embed_dims=embed_dims,
-                feedforward_channels=embed_dims*8,  # 1024 for DeformDETR
+                feedforward_channels=embed_dims * 8,  # 1024 for DeformDETR
                 ffn_drop=0.0),
-            norm_cfg=dict(type=norm),)),  # 0.1 for DeformDETR
+            norm_cfg=dict(type=norm), )),  # 0.1 for DeformDETR
     decoder=dict(
         num_layers=6,
         return_intermediate=True,
         layer_cfg=dict(
             self_attn_cfg=dict(embed_dims=embed_dims, num_heads=8,
                                dropout=0.0),  # 0.1 for DeformDETR
-            cross_attn_cfg=dict(embed_dims=embed_dims, num_levels=num_levels, num_points=4, #local_attn_type = 'fix_same_orientation',  # fix_same_orientation
+            cross_attn_cfg=dict(embed_dims=embed_dims, num_levels=num_levels, num_points=4,
+                                # local_attn_type = 'fix_same_orientation',  # fix_same_orientation
                                 dropout=0.0),  # 0.1 for DeformDETR
             ffn_cfg=dict(
                 embed_dims=embed_dims,
-                feedforward_channels=embed_dims*8,  # 1024 for DeformDETR 2048 for dino
+                feedforward_channels=embed_dims * 8,  # 1024 for DeformDETR 2048 for dino
                 ffn_drop=0.0),
-            norm_cfg=dict(type=norm),),  # 0.1 for DeformDETR  norm_cfg=dict(type='LN')
+            norm_cfg=dict(type=norm), ),  # 0.1 for DeformDETR  norm_cfg=dict(type='LN')
         post_norm_cfg=None),
     positional_encoding=dict(
-        num_feats=embed_dims//2,
+        num_feats=embed_dims // 2,
         normalize=True,
         offset=0.0,  # -0.5 for DeformDETR
         temperature=20),  # 10000 for DeformDETR
@@ -69,9 +71,9 @@ model = dict(
         type='SpecDetrHead',
         num_classes=2,
         sync_cls_avg_factor=True,
-        pre_bboxes_round = True,
-        use_nms = True,
-        iou_threshold = 0.01,
+        pre_bboxes_round=True,
+        use_nms=True,
+        iou_threshold=0.01,
         # neg_cls = True,
         loss_cls=dict(
             type='FocalLoss',
@@ -82,15 +84,15 @@ model = dict(
         loss_bbox=dict(type='L1Loss', loss_weight=5.0),
         loss_iou=dict(type='GIoULoss', loss_weight=2.0)),
     dn_cfg=dict(  # TODO: Move to model.train_cfg ?
-        label_noise_scale=0.5,  #  centor 0.1 -0.5
-        box_noise_scale =1.5,  #    wh noise  1---
+        label_noise_scale=0.5,  # centor 0.1 -0.5
+        box_noise_scale=1.5,  # wh noise  1---
         # group_cfg=dict(dynamic=False, num_groups=30,
         #                num_dn_queries=200),
         group_cfg=dict(dynamic=True, num_groups=None,
                        num_dn_queries=200),
         # group_cfg=dict(dynamic=False, num_groups=10,
         #                num_dn_queries=None),
-            ),  # TODO: half num_dn_queries
+    ),  # TODO: half num_dn_queries
     # training and testing settings
     # train_cfg=dict(
     #     assigner=dict(
@@ -150,7 +152,6 @@ model = dict(
     #         dynamic_match=True)),
 
     test_cfg=dict(max_per_img=300))  # 100 for DeformDETR
-
 
 # optimizer
 optim_wrapper = dict(
